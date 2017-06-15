@@ -55,7 +55,6 @@ class CurrentUserConcernTest < ActionController::TestCase
 
   tests CurrentUserTestController
   use_test_routes CurrentUserTestController
-  with_paper_trail
 
   def self.authorized(method, action, params)
     it "is authorized to #{method} #{action}" do

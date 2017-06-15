@@ -78,8 +78,6 @@ describe UserProjectRole do
   end
 
   describe "versioning" do
-    with_paper_trail
-
     it "tracks important changes" do
       project_role.versions.size.must_equal 1
       project_role.update_attributes!(role_id: 1)

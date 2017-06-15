@@ -37,8 +37,6 @@ describe Command do
   end
 
   describe "#trigger_stage_change" do
-    with_paper_trail
-
     it "triggers a version when command changes" do
       command.update_attribute(:command, 'new')
       command.reload.stages.first.versions.size.must_equal 1
