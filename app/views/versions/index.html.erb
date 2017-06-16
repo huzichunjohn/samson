@@ -1,20 +1,40 @@
-<%= page_title "Versions for #{params.require(:item_type)} #{params.require(:item_id)}" %>
+<%
+  type = params.dig(:search, :item_type)
+  id = params.dig(:search, :item_id)
+  global = !type || !id
+  page_title(global ? "Versions" : "Versions for #{type} #{id}")
+  users = Hash.new { |h, k| h[k] = User.find_by_id(k) } # avoid N+1s
+%>
+
+<%= search_form do %>
+  <%= search_select :event, ["create", "update", "destroy"] %>
+  <%= search_select :item_id, versioned_classes.map(&:name).sort, label: "Resource" %>
+  <%= search_select :whodunnit, User.pluck(:name, :id), live: true, label: "By" %>
+<% end %>
 
 <table class="table">
   <tr>
-    <th>Date</th>
-    <th>Modified by</th>
-    <th>Previous version</th>
+    <th></th>
+    <th></th>
+    <th>Diff</th>
   </tr>
   <% @versions.each do |v, diff| %>
     <tr>
-      <td><%= v.id %> -- <%= v.created_at %></td>
+      <td><%= v.id %></td>
       <td>
-        <% if v.whodunnit =~ /^\d+$/ && user = User.find_by_id(v.whodunnit) %>
+        <% if global %>
+          <%= v.item ? link_to_resource(v.item) : "#{v.item_type} #{v.item_id}" %>
+          <br/>
+        <% end %>
+        <%= v.event %>
+        by
+        <% if v.whodunnit =~ /^\d+$/ && user = users[v.whodunnit] %>
           <%= link_to user.name, user_path(user) %>
         <% else %>
           <%= v.whodunnit %>
         <% end %>
+        <br/>
+        <%= render_time v.created_at %>
       </td>
       <td>
         <% if diff %>
@@ -32,3 +52,5 @@
     </tr>
   <% end %>
 </table>
+
+<%= paginate @versions %>

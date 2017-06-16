@@ -1,11 +1,9 @@
 # frozen_string_literal: true
 class VersionsController < ApplicationController
   def index
-    versions = PaperTrail::Version.where(
-      item_id: params.require(:item_id),
-      item_type: params.require(:item_type)
-    ).order(id: :desc)
-    @versions = versions_with_diff(versions)
+    query = params[:search]&.permit(:item_id, :item_type, :whodunnit, :event)&.to_unsafe_h&.reject { |_, v| v.blank? }
+    @versions = PaperTrail::Version.where(query).order(id: :desc).page(page).per(25)
+    @versions.instance_variable_set(:@records, versions_with_diff(@versions))
   end
 
   private

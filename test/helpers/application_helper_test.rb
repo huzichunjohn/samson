@@ -342,6 +342,16 @@ describe ApplicationHelper do
     it "fails on unknown" do
       assert_raises(ArgumentError) { link_to_resource(123) }.message.must_equal "Unsupported resource 123"
     end
+
+    # sanity check that we did not miss anything especially plugin models
+    it "can render each versioned model" do
+      SecretSharingGrant.create!(project: projects(:test), key: 'foo')
+
+      versioned_classes.each do |klass|
+        model = klass.first || klass.new
+        link_to_resource(model)
+      end
+    end
   end
 
   describe "#render_nested_errors" do
